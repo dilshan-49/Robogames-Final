@@ -56,37 +56,7 @@ def control_robot(direction,color,pixel_distance):
     """Controls the robot based on detected direction."""
 
     pass
-    # while running:
-    #     if direction == "Forward":
-    #         print("Moving Forward")  # 
-    #         robot.move(80, 80, 0)
-    #     elif direction == "Left":
-    #         print("Turning Left")  # 
-    #         robot.move(40, 80, 0)
-    #     elif direction == "Right":
-    #         print("Turning Right")  # 
-    #         robot.move(80, 40, 0)
-    #     elif direction == "Stop":
-    #         print("Stopping")  # 
-    #         robot.move(0, 0, 0)
-        
-    #    time.sleep(0.1)  # Prevents CPU overuse
-def predict_frame(frame,model):
-    pass
 
-    # Predict the direction
-    #direction = model.predict(frame)
-    #direction = np.argmax(direction)
-    #direction = classes[direction]
-
-    # Predict the distance
-    #distance = model.predict(frame)
-    #distance = np.argmax(distance)
-    #distance = classes[distance]
-    #print("Direction: ", direction)
-    #print("Distance: ", distance)
-    #return direction, distance
-    return 50,"red",True,False
 if __name__ == "__main__":
     #distance to the nearest object from the middle of the screen
     
@@ -111,13 +81,6 @@ if __name__ == "__main__":
             break
         annotated_frame,objectPresent,isGrabed,pixel_distance,color=predict_frame(frame)
         
-        #import the model
-        #run the model
-        #depnd on the object get several detaied information
-        #get the direction of the object
-        #pixel_distance,color,area,objectpresent,isboxgrabbed=getdeteilsfromthemodel()
-        #have to controll the robot according to the position
-        
         if(objectPresent):
             if(pixel_distance>20):
                 robot.move(80,0,0)
@@ -135,12 +98,6 @@ if __name__ == "__main__":
             # placedtodirection=searchForPlacementColor()
             # if(placedtodirection):
             #     movetothedestination()
-        #if ether box is noot detected or box is not grabbed
-        #search for the box
-        #turntoDetectObject()#wonce a box id detected just let go the loop
-        #if detected move towards the object
-        #if it doesnt ditect the correct object
-        #move to the white obstruct
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 
