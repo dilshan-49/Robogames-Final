@@ -2,17 +2,17 @@ import cv2
 import numpy as np
 import time
 import threading
-# from kobukidriver import Kobuki  # Uncomment if using the actual robot
+from kobukidriver import Kobuki  # Uncomment if using the actual robot
 
 class colorBoxPlacement:
-    def __init__(self):
-        # self.robot = Kobuki()  # Uncomment when using the robot
+    def _init_(self):
+        self.robot = Kobuki()  # Uncomment when using the robot
         self.cap = cv2.VideoCapture(0)  # Open the default webcam
         if not self.cap.isOpened():
             print("Error: Could not open camera.")
             exit(1)
         
-        self.direction = "Stop"
+        self.direction = "Forward"
         self.running = True
         self.last_detection_time = time.time()
         self.timeout = 2
@@ -27,8 +27,8 @@ class colorBoxPlacement:
             "White": [(np.array([0, 0, 200]), np.array([180, 50, 255]))]
         }
     def initializecolorPositions(self):
-        # Set the initial position of the robot
-        # self.robot.move(0, 0, 0)
+        # initialize the colored placment positions
+        
         time.sleep(1)
     def detect_color_boxes(self, frame):
         """Detects multiple colored boxes in the frame, labels them, and returns processed frame."""
@@ -56,48 +56,52 @@ class colorBoxPlacement:
         """Controls the robot based on detected direction."""
         while self.running:
             if self.direction == "Forward":
-                print("Moving Forward")  # self.robot.move(80, 80, 0)
+                print("Moving Forward")   
+                self.robot.move(80, 80, 0)
             elif self.direction == "Left":
-                print("Turning Left")  # self.robot.move(40, 80, 0)
+                print("Turning Left")   
+                self.robot.move(40, 80, 0)
             elif self.direction == "Right":
-                print("Turning Right")  # self.robot.move(80, 40, 0)
+                print("Turning Right")   
+                self.robot.move(80, 40, 0)
             elif self.direction == "Stop":
-                print("Stopping")  # self.robot.move(0, 0, 0)
+                print("Stopping")   
+                self.robot.move(0, 0, 0)
             
             time.sleep(0.1)  # Prevents CPU overuse
     
     def run(self):
         """Main function to capture video and detect colors."""
-        # Start robot control in a separate thread
-        # robot_thread = threading.Thread(target=self.control_robot)
-        # robot_thread.daemon = True
-        # robot_thread.start()
+        #Start robot control in a separate thread
+        robot_thread = threading.Thread(target=self.control_robot)
+        robot_thread.daemon = True
+        robot_thread.start()
         
-        # Play sound to indicate start
-        # self.robot.play_on_sound()
+        #Play sound to indicate start
+        self.robot.play_on_sound()
         
-        try:
-            while self.running:
-                ret, frame = self.cap.read()
-                if not ret:
-                    print("Error: Failed to capture image")
-                    break
+        # try:
+        #     while self.running:
+        #         ret, frame = self.cap.read()
+        #         if not ret:
+        #             print("Error: Failed to capture image")
+        #             break
                 
-                frame = self.detect_color_boxes(frame)
+        #         frame = self.detect_color_boxes(frame)
                 
-                cv2.imshow("Color Box Detection", frame)  # Fixed missing window name
+        #         cv2.imshow("Color Box Detection", frame)  # Fixed missing window name
                 
-                if cv2.waitKey(1) & 0xFF == ord('q'):
-                    break
+        #         if cv2.waitKey(1) & 0xFF == ord('q'):
+        #             break
         
-        finally:
-            # Clean up
-            self.running = False
-            # self.robot.move(0, 0, 0)  # Stop the robot
-            # self.robot.play_off_sound()
-            self.cap.release()
-            cv2.destroyAllWindows()
-            # robot_thread.join(timeout=1.0)  # Uncomment if using threading
+        # finally:
+        #     # Clean up
+        #     self.running = False
+        #     # self.robot.move(0, 0, 0)  # Stop the robot
+        #     # self.robot.play_off_sound()
+        #     self.cap.release()
+        #     cv2.destroyAllWindows()
+        #     # robot_thread.join(timeout=1.0)  # Uncomment if using threading
 
 def main():
 
@@ -105,7 +109,7 @@ def main():
     follower.initializecolorPositions()
     follower.run()
 
-if __name__ == "__main__":
+if __name__ == "_main_":
     try:
         main()
     except Exception as e:
