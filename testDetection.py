@@ -3,7 +3,7 @@ import numpy as np
 from ultralytics import YOLO
 
 # Load YOLOv8 model
-model = YOLO("best_float32.tflite")
+model = YOLO("model/detectBox.tflite")
 
 # Start video capture
 cap = cv2.VideoCapture("robogames.avi")
@@ -15,7 +15,7 @@ while cap.isOpened():
 
     # Resize frame to match model input size
 
-    results = model(frame)
+    results = model.track('robogames.avi',show=True, tracker="bytetrack.yaml")
 
     # Process & display output
     annotated_frame = results[0].plot()
