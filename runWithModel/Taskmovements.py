@@ -79,11 +79,6 @@ def turntoDetectObject():
         robot.move(0,80,0)
     pass
 
-<<<<<<< HEAD
-=======
-    pass
-
->>>>>>> a6ade64076e8d7cf78a6f0ea02868863ba3a71fe
 if __name__ == "__main__":
     
     robot = Kobuki()
@@ -96,7 +91,6 @@ if __name__ == "__main__":
         frame = camera.get_frame()
 
         annotated_frame,objectPresent,isGrabed,pixel_distance,color=predict_frame(frame)
-<<<<<<< HEAD
 
         if(color is not None):
             print("Color detected is : ",color)
@@ -106,12 +100,6 @@ if __name__ == "__main__":
         if(objectPresent):#Here need to avoid detecting the placed colors as well
             if(pixel_distance>30):
                 robot.move(50,0,0)
-=======
-        
-        if(objectPresent):
-            if(pixel_distance>20):
-                robot.move(80,0,0)
->>>>>>> a6ade64076e8d7cf78a6f0ea02868863ba3a71fe
                 direction="Right"
             elif (pixel_distance<-30):
                 robot.move(0,50,0)
@@ -123,7 +111,6 @@ if __name__ == "__main__":
         if(isGrabed):
             print("Box is taken")
             robot.play_error_sound()
-<<<<<<< HEAD
             placedtodirection=searchForPlacementColor(latestColor)
             if(placedtodirection):
                 movetothedestination()
@@ -141,11 +128,6 @@ if __name__ == "__main__":
         #if it doesnt ditect the correct object
         #move to the white obstruct
         cv2.imshow("a",annotated_frame)
-=======
-            # placedtodirection=searchForPlacementColor()
-            # if(placedtodirection):
-            #     movetothedestination()
->>>>>>> a6ade64076e8d7cf78a6f0ea02868863ba3a71fe
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 camera.stop()
