@@ -2,6 +2,9 @@ import cv2
 import numpy as np
 from ultralytics import YOLO
 
+model = YOLO("model/robogames_final.tflite")
+
+
 isGrabed = False
 grab_area = [200,300,450,580] # x1, y1, x2, y2
 pixel_distance = 0
@@ -53,12 +56,18 @@ def is_grab(max_x_center, max_y_center):
     return False
 
 # # Load YOLOv8 model
-model = YOLO("weights/best_float32.tflite")
+
 
 
 
 def predict_frame(frame):  
     # Run inference
+    
+    global isGrabed
+    global pixel_distance
+    global objectPresent
+    detected_color="unknown"
+    
     results = model(frame,conf = 0.7)
 
     # Process & display output
@@ -115,24 +124,6 @@ def predict_frame(frame):
                     cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
         cv2.putText(annotated_frame, f"Color: {detected_color}", (int(max_x_center), int(max_y_center) + 30),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 200), 2)
-    cv2.imshow("YOLOv8 Detection", annotated_frame)
-    print("Frame",annotated_frame.shape)
 
     return annotated_frame,objectPresent,isGrabed,pixel_distance,detected_color 
 
-# # ##########################################Start video capture#########################
-
-# cap = cv2.VideoCapture("robogames01.mp4")
-
-# while cap.isOpened():
-#     ret, frame = cap.read()
-#     if not ret:
-#         break
-
-#     predict_frame(frame)
-
-#     if cv2.waitKey(1) & 0xFF == ord('q'):
-#         break
-
-# cap.release()
-# cv2.destroyAllWindows()

@@ -2,17 +2,15 @@ import cv2
 import numpy as np
 import time
 from kobukidriver import Kobuki
-import yolov8_model 
-#import threading
+from cam_feed import Camera
 
+from yolov8_model import *
+#import threading
 #
 direction = "Stop"
-pixel_distance = 50 #this can vary from -360 to +360
 color="red"
+camera = Camera()
 
-#boxinArms=False
-objectPresent=False
-isGrabed=False
 
 
 
@@ -71,22 +69,7 @@ def control_robot(direction,color,pixel_distance):
     #         robot.move(0, 0, 0)
         
     #    time.sleep(0.1)  # Prevents CPU overuse
-def predict_frame(frame,model):
-    pass
 
-    # Predict the direction
-    #direction = model.predict(frame)
-    #direction = np.argmax(direction)
-    #direction = classes[direction]
-
-    # Predict the distance
-    #distance = model.predict(frame)
-    #distance = np.argmax(distance)
-    #distance = classes[distance]
-    #print("Direction: ", direction)
-    #print("Distance: ", distance)
-    #return direction, distance
-    return 50,"red",True,False
 if __name__ == "__main__":
     #distance to the nearest object from the middle of the screen
     
@@ -99,18 +82,13 @@ if __name__ == "__main__":
     robot.play_on_sound()
     #on the cameras
     robot.move(0,0,0)#stop initially
-    cap = cv2.VideoCapture(0)
-    if not cap.isOpened():
-        print("Error: Failed to open camera.")
-        exit()
+
 
     while True:
-        ret, frame = cap.read()
-        if not ret:
-            print("Error: Failed to capture image")
-            break
+
+        frame = camera.get_frame()
+
         annotated_frame,objectPresent,isGrabed,pixel_distance,color=predict_frame(frame)
-        
         #import the model
         #run the model
         #depnd on the object get several detaied information
@@ -119,11 +97,11 @@ if __name__ == "__main__":
         #have to controll the robot according to the position
         
         if(objectPresent):
-            if(pixel_distance>20):
-                robot.move(80,0,0)
+            if(pixel_distance>30):
+                robot.move(50,0,0)
                 direction="Right"
-            elif (pixel_distance<-20):
-                robot.move(0,80,0)
+            elif (pixel_distance<-30):
+                robot.move(0,50,0)
                 direction="Left"
             else:
                 robot.move(80,80,0)
@@ -132,19 +110,19 @@ if __name__ == "__main__":
         if(isGrabed):
             print("Box is taken")
             robot.play_error_sound()
-            # placedtodirection=searchForPlacementColor()
-            # if(placedtodirection):
-            #     movetothedestination()
+            #placedtodirection=searchForPlacementColor()
+            #if(placedtodirection):
+                #movetothedestination()
         #if ether box is noot detected or box is not grabbed
         #search for the box
         #turntoDetectObject()#wonce a box id detected just let go the loop
         #if detected move towards the object
         #if it doesnt ditect the correct object
         #move to the white obstruct
+        cv2.imshow("a",annotated_frame)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
-
-cap.release()
+camera.stop()
 cv2.destroyAllWindows()
         
 
