@@ -86,8 +86,10 @@ def turnRound():
 #----------------------------------------------
 def initializedetectingObject():
     objectPresent=False
+    global turndDirection
+
     while(not objectPresent):
-        annotated_frame,objectPresent,isGrabed,pixel_distance,color=getBoxdata()
+        objectPresent,isGrabed,pixel_distance,color=getBoxdata()
         if(not objectPresent):
             if(direction=="init"):
                 turnLeft() 
@@ -109,7 +111,7 @@ def moveToBox():
         detectedcolor=[]
         count=0
         while(True):
-            annotated_frame,objectPresent,isGrabed,pixel_distance,color=getBoxdata()
+            objectPresent,isGrabed,pixel_distance,color=getBoxdata()
             if(isGrabed):
                 robot.move(0,0,0) 
                 return color
@@ -129,15 +131,27 @@ def moveToBox():
                     robot.move(80,80,0)
         robot.move(0,0,0) 
            
+def place_Box():
+    global isGrabed
+    robot.move(60,60,0)
+    time.sleep(1)
+    robot.move(0,0,0)
+    robot.play_on_sound()
+    robot.move(-80,-80,0)
+    time.sleep(1)
+    robot.move(-80,-80,0)
+    isGrabed=False
 
 
-def turntoPlacemnet(detectedcolor):
-    isplacemnet=False
-    placmentColor="unknown"
-    area=0
+
+def gotoPlacemnet(detectedcolor):
+    global can_place
+    global turndDirection
+
+    target_found, target_pixel_distance, can_place=getTargetdata(detectedcolor)
     #need to get the placment position data,color,are of the placment positionand so on using the model
     #target detection code
-    while(target_color!=detectedcolor):
+    while(not target_found):
         #need to get the placment position data,color,are of the placment positionand so on using the model
         if(turndDirection=="Left"):
             turnLeft()
@@ -145,8 +159,12 @@ def turntoPlacemnet(detectedcolor):
         if(turndDirection=="Right"):
             turnRight()
             turndDirection="Right"
+
+        target_found, target_pixel_distance, can_place=getTargetdata(detectedcolor)
+
+
     #need to fix
-    while(target_area<5000):
+    while(not can_place):
         #need to get the placment position data,color,are of the placment positionand so on using the model
         if(target_pixel_distance>30):
             robot.move(50,0,0)
@@ -156,25 +174,32 @@ def turntoPlacemnet(detectedcolor):
             direction="Left"
         else:
             robot.move(80,80,0)
-    robot.move(0,0,0)
+        target_found, target_pixel_distance, can_place=getTargetdata(detectedcolor)
+
+    place_Box()
+    colorArray.remove(detectedcolor)
+
+
     return
     
-def movetoBack():
-    area=5000
-    #need to get the placment position data,color,are of the placment positionand so on using the model
-    while(area>500):
-        robot.move(-80,-80,0)
-    robot.move(0,0,0)
-    return
-def getTargetdata():
-    pass
+
+
+
+def getTargetdata(color):
+    frame = camera.get_frame()
+    annotated_frame,target_found, target_pixel_distance, can_place=find_target(frame,color)
+    cv2.imshow("a",annotated_frame)
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        return
+    return target_found, target_pixel_distance, can_place
+
 def getBoxdata():
     frame = camera.get_frame()
     annotated_frame,objectPresent,isGrabed,pixel_distance,color=search_box(frame)
     cv2.imshow("a",annotated_frame)
     if cv2.waitKey(1) & 0xFF == ord('q'):
         return
-    return annotated_frame,objectPresent,isGrabed,pixel_distance,color
+    return objectPresent,isGrabed,pixel_distance,color
 
 if __name__ == "__main__":
     
@@ -185,41 +210,16 @@ if __name__ == "__main__":
     
     initializedetectingObject()#initially check whther a box is detecte 
     detectedcolor=moveToBox()
-    if(detectedcolor=="White"):
-        robot.move(-80,-80,0)
-   # turntoPlacemnet(detectedcolor)
-    movetoBack()
+    gotoPlacemnet(detectedcolor)
+    robot.move(-60,80,0)
+    time.sleep(1)
+    robot.move(0,0,0)
+    robot.play_on_sound()
+    robot.play_on_sound()
+    robot.play_on_sound()
+    print("done")
 
-
-#----------------------------------------
-        # if(color != "unknown"):
-        #     print("Color detected is : ",color)
-        #     latestColor=color#conflict here
-        #                     #color changes rapidly if that detect somme another object with little higher area
-        # if(objectPresent):#Here need to avoid detecting the placed colors as well
-        #     if(pixel_distance>30):
-        #         robot.move(50,0,0)
-        #         direction="Right"
-        #     elif (pixel_distance<-30):
-        #         robot.move(0,50,0)
-        #         direction="Left"
-        #     else:
-        #         robot.move(80,80,0)
-        #         direction="Forward"
-
-        # if(isGrabed):
-        #     print("Box is taken")
-        #     robot.play_error_sound()
-        #     placedtodirection=searchForPlacementColor(latestColor)
-        #     if(placedtodirection):
-        #         movetothedestination()
-        #         robot.move(-80,-80,-80)#is one time call is enough
-        #         turnRound()
-                
-
-        # if((not isGrabed) and (not objectPresent)):
-        #     print("No any object detected")
-        #     turntoDetectObject()
+    
 
         
 

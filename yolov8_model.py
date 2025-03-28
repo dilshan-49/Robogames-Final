@@ -5,8 +5,8 @@ from ultralytics import YOLO
 model = YOLO("model/robogames_v2.pt")
 
 
-
-grab_area = [260,400,380,480] # x1, y1, x2, y2
+isGrabed = False
+grab_area = [250,400,390,480] # x1, y1, x2, y2
 pixel_distance = 0
 objectPresent = False
 color = "Unknown"
@@ -44,7 +44,7 @@ def detect_color_hsv(box, frame):
     avg_color = np.mean(avg_color_per_row, axis=0)
     
     avg_color = np.uint8(avg_color)  # Convert to uint8 (0-255)
-    
+    print(f"Avg color: {avg_color}")
     detected_color = classify_color_hsv(avg_color)
     
     return avg_color, detected_color  # Return both HSV color and detected color
@@ -58,7 +58,7 @@ def is_grab(max_x_center, max_y_center, color):
 
 
 def search_box(frame):  
-    
+    global isGrabed
     global pixel_distance
     global objectPresent
     detected_color="unknown"
@@ -102,7 +102,6 @@ def search_box(frame):
 
     if max_box is None:
         objectPresent = False
-        isGrabed = False
 
         
     else:
@@ -128,4 +127,45 @@ def search_box(frame):
                     cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 200), 2)
 
     return annotated_frame,objectPresent,isGrabed,pixel_distance,detected_color 
+
+# Find a matching target for grabbed box
+def find_target(frame, detected_color):
+    global target_found
+    global target_pixel_distance
+    global can_place 
+    global isGrabed
+    print("Searching for target...")
+    tframe_width = frame.shape[1]
+    mid_line = tframe_width//2
+
+    results = model(frame,conf= 0.7)
+    result=results[0].cpu().numpy()
+    annotated_frame = results[0].plot()
+
+    for box in result.boxes:
+        if(int(box.cls[0])==2):
+            
+            target_x1, target_y1, target_x2, target_y2 = box.xyxy[0]
+            target_pix_area = abs((target_y2-target_y1)*(target_x2-target_x1))
+            target_center = (target_x1 + target_x2) // 2
+            target_color = detect_color_hsv(box, frame)
+            print(f"Target color: {target_color}")
+            if(target_color == detected_color):
+                print("Target found!")
+                cv2.rectangle(annotated_frame, (int(target_x1), int(target_y1)), (int(target_x2), int(target_y2)), (0, 255, 0), 2)
+                cv2.putText(annotated_frame, "Target found!", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+                target_found = True
+                target_pixel_distance = target_center - mid_line
+                if(target_pix_area>100000):
+                    print(" Place the shit")
+                    can_place = True
+                    isGrabed = False
+                else:
+                    can_place = False
+            else:
+                target_found = False
+                target_pixel_distance = 0
+                can_place = False
+
+    return annotated_frame,target_found, target_pixel_distance, can_place
 
