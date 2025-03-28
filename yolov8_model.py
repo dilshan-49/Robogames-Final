@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 from ultralytics import YOLO
 
-model = YOLO("model/robogames_final.tflite")
+model = YOLO("model/robogames_final.pt")
 
 
 isGrabed = False
@@ -14,15 +14,11 @@ color = "Unknown"
 COLOR_RANGES_HSV = {
     "Red": [(0,40,80), (10, 255, 255)],   # Red can also be (170,255,255) in OpenCV
     "Green": [(35, 40, 80), (80, 255, 255)],
-    "Blue": [(80, 40, 80), (130, 255, 255)],
+    "Blue": [(80, 40, 80), (130, 255, 255)],  #Should change to light blue
     "Yellow": [(20, 40, 80), (35, 255, 255)]
 }
 
 
-
-# Function to calculate area of a contour
-def contour_area(x1,y1,x2,y2):
-    return abs(x2-x1)*abs(y2-y1)
 
 # Function to classify color using HSV ranges
 def classify_color_hsv(hsv):
@@ -33,10 +29,9 @@ def classify_color_hsv(hsv):
     return "Unknown"
 
 # Function to detect color in a selected region using HSV
-def detect_color_hsv(max_x1, max_y1, max_x2, max_y2, frame):
+def detect_color_hsv(box, frame):
     hsv_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)  # Convert to HSV
-    
-    max_x1, max_y1, max_x2, max_y2 = map(int, [max_x1, max_y1, max_x2, max_y2])
+    max_x1, max_y1, max_x2, max_y2=map(int,box.xyxy[0])
     color_box = hsv_frame[max_y1:max_y2, max_x1:max_x2]
 
     avg_color_per_row = np.mean(color_box, axis=0)
@@ -55,11 +50,6 @@ def is_grab(max_x_center, max_y_center):
         return True
     return False
 
-# # Load YOLOv8 model
-
-
-
-
 def predict_frame(frame):  
     # Run inference
     
@@ -69,27 +59,27 @@ def predict_frame(frame):
     detected_color="unknown"
     
     results = model(frame,conf = 0.7)
-
+    result=results[0].cpu().numpy()
     # Process & display output
     annotated_frame = results[0].plot()
 
 
-    frame_hieght, frame_width, _ = frame.shape
+    frame_width = frame.shape[1]
     mid_vertical_line = frame_width//2
 
-    for result in results:
-        max_box = None
-        max_area = 0
-        
-        for box in result.boxes:
-            x1, y1, x2, y2 = box.xyxy[0].cpu().numpy()
-            x_center = (x1 + x2) // 2
-            y_center = (y1 + y2) // 2
-            pixel_area = contour_area(x1,y1,x2,y2)
-            
-            if pixel_area > max_area:
-                max_area = pixel_area
-                max_box = box
+    max_box = None
+    max_area = 0
+    
+    for box in result.boxes:
+        print(f"xywh : {box.xywh}")
+        object_type=int(box.cls[0])
+        x_center,y_center,w,h = box.xywh[0]
+        pixel_area=w*h
+        print(f" class : {box.cls[0]}")
+        print(box.cls.shape)
+        if pixel_area > max_area:
+            max_area = pixel_area
+            max_box = box
             
             cv2.putText(annotated_frame, f"Area: {pixel_area:.2f}px", (int(x_center), int(y_center) + 10),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
@@ -100,12 +90,11 @@ def predict_frame(frame):
             continue
         else:
             objectPresent = True
-            max_x1, max_y1,max_x2,max_y2 = max_box.xyxy[0].cpu().numpy()
-            max_x_center = (max_x1 + max_x2) // 2
-            max_y_center = (max_y1 + max_y2) // 2
+            max_x_center,  max_y_center,*_ = max_box.xywh[0]
+
             pixel_distance =  max_x_center - mid_vertical_line
 
-            avg_color,detected_color = detect_color_hsv(max_x1,max_y1,max_x2,max_y2,frame)
+            avg_color,detected_color = detect_color_hsv(box,frame)
             print(f"Detected color: {avg_color}")
             print(f"Detected color: {detected_color}")  
 

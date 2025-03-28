@@ -45,7 +45,9 @@ def searchForPlacementColor(color):
                 stop()
                 return True
             
-            
+def findTatget(color):
+    pass
+
 def movetothedestination():
     pass
 def turntoDetectObject():
