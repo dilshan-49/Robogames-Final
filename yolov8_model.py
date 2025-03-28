@@ -50,17 +50,17 @@ def is_grab(max_x_center, max_y_center):
         return True
     return False
 
-def predict_frame(frame):  
-    # Run inference
-    
-    global isGrabed
+
+def search_box(frame):  
+   
     global pixel_distance
     global objectPresent
     detected_color="unknown"
     
+    # Run inference
     results = model(frame,conf = 0.7)
     result=results[0].cpu().numpy()
-    # Process & display output
+  
     annotated_frame = results[0].plot()
 
 
@@ -73,39 +73,44 @@ def predict_frame(frame):
     for box in result.boxes:
         print(f"xywh : {box.xywh}")
         object_type=int(box.cls[0])
-        x_center,y_center,w,h = box.xywh[0]
-        pixel_area=w*h
-        print(f" class : {box.cls[0]}")
-        print(box.cls.shape)
-        if pixel_area > max_area:
-            max_area = pixel_area
-            max_box = box
-            
-            cv2.putText(annotated_frame, f"Area: {pixel_area:.2f}px", (int(x_center), int(y_center) + 10),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
-            cv2.rectangle(annotated_frame, (int(grab_area[0]), int(grab_area[1])), (int(grab_area[2]), int(grab_area[3])), (255, 255, 255), 1)
+        if object_type==0:
 
-        if max_box is None:
-            objectPresent = False
-            continue
-        else:
-            objectPresent = True
-            max_x_center,  max_y_center,*_ = max_box.xywh[0]
-
-            pixel_distance =  max_x_center - mid_vertical_line
-
+            x_center,y_center,w,h = box.xywh[0]
+            pixel_area=w*h
             avg_color,detected_color = detect_color_hsv(box,frame)
             print(f"Detected color: {avg_color}")
-            print(f"Detected color: {detected_color}")  
+            print(f"Detected color: {detected_color}") 
 
-            if is_grab(max_x_center, max_y_center):
-                isGrabed = True
-                cv2.putText(annotated_frame, "Object in grab area!", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
-                cv2.putText(annotated_frame, f"Color: {detected_color}", (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)  
-            else:
-                isGrabed = False
-                cv2.putText(annotated_frame, "Object not in grab area!", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
-                cv2.putText(annotated_frame, f"Color: {detected_color}", (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+            if pixel_area > max_area and detected_color != "Unknown":
+                max_area = pixel_area
+                max_box = box
+                max_x_center=x_center
+                max_y_center=y_center
+                
+                cv2.putText(annotated_frame, f"Area: {pixel_area:.2f}px", (int(x_center), int(y_center) + 10),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+                cv2.rectangle(annotated_frame, (int(grab_area[0]), int(grab_area[1])), (int(grab_area[2]), int(grab_area[3])), (255, 255, 255), 1)
+
+        if object_type==1:  ## obstacle detected
+            pass
+
+    if max_box is None:
+        objectPresent = False
+        
+    else:
+        objectPresent = True
+
+        pixel_distance =  max_x_center - mid_vertical_line
+
+
+        if is_grab(max_x_center, max_y_center):
+            isGrabed = True
+            cv2.putText(annotated_frame, "Object in grab area!", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+            cv2.putText(annotated_frame, f"Color: {detected_color}", (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)  
+        else:
+            isGrabed = False
+            cv2.putText(annotated_frame, "Object not in grab area!", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+            cv2.putText(annotated_frame, f"Color: {detected_color}", (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
 
 
         cv2.circle(annotated_frame, (int(max_x_center), int(max_y_center)), 5, (0, 255, 0), -1)
