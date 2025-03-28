@@ -106,18 +106,14 @@ def initializedetectingObject():
         
 def moveToBox():
         #no point of moving towards a white color as well fix that
-        isGrabed=False
-        count=0
         detectedcolor=[]
-        while(not isGrabed):
+        count=0
+        while(True):
             annotated_frame,objectPresent,isGrabed,pixel_distance,color=getBoxdata()
             if(isGrabed):
                 robot.move(0,0,0) 
-                if(detectedcolor):
-                    counter = Counter(detectedcolor)
-                    return max(counter, key=counter.get)
-                else:
-                    return "White"
+                return color
+
             if(objectPresent):
                 if(color in colorArray and count<5):
                     detectedcolor.append(color)

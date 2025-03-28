@@ -2,14 +2,20 @@ import cv2
 import numpy as np
 from ultralytics import YOLO
 
-model = YOLO("model/robogames_final.pt")
+model = YOLO("model/robogames_v2.pt")
 
 
-isGrabed = False
-grab_area = [200,300,450,580] # x1, y1, x2, y2
+
+grab_area = [260,400,380,480] # x1, y1, x2, y2
 pixel_distance = 0
 objectPresent = False
 color = "Unknown"
+
+#found target variables
+target_found = False
+target_pixel_distance = 0
+can_place = False
+
 
 COLOR_RANGES_HSV = {
     "Red": [(0,40,80), (10, 255, 255)],   # Red can also be (170,255,255) in OpenCV
@@ -45,14 +51,14 @@ def detect_color_hsv(box, frame):
 
 
 # Function to check if the object is in the grab area
-def is_grab(max_x_center, max_y_center):
+def is_grab(max_x_center, max_y_center, color):
     if grab_area[0] < max_x_center < grab_area[2] and grab_area[1] < max_y_center < grab_area[3]:
         return True
     return False
 
 
 def search_box(frame):  
-   
+    
     global pixel_distance
     global objectPresent
     detected_color="unknown"
@@ -96,6 +102,8 @@ def search_box(frame):
 
     if max_box is None:
         objectPresent = False
+        isGrabed = False
+
         
     else:
         objectPresent = True
@@ -103,7 +111,7 @@ def search_box(frame):
         pixel_distance =  max_x_center - mid_vertical_line
 
 
-        if is_grab(max_x_center, max_y_center):
+        if is_grab(max_x_center, max_y_center,color):
             isGrabed = True
             cv2.putText(annotated_frame, "Object in grab area!", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
             cv2.putText(annotated_frame, f"Color: {detected_color}", (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)  
