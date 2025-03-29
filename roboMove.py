@@ -3,7 +3,6 @@ import numpy as np
 import time
 from kobukidriver import Kobuki
 from cam_feed import Camera
-from collections import Counter
 
 from yolov8_model import *
 
@@ -12,7 +11,7 @@ latestColor=None
 direction = "init"
 color="unknown"
 turndDirection="init"
-skip_obstacles=True
+skip_obstacles=False
 
 
 camera = Camera()
