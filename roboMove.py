@@ -58,7 +58,7 @@ def moveToBox():
                 return
 
             if(objectPresent):
-                if (-100<obstacle_dist<100 and skip_obstacles):
+                if (-100<obstacle_dist<100 and skip_obstacles): #if obstacles taken into consideration
                     robot.move(0,0,0)
                     robot.play_on_sound()
                     time.sleep(1)
