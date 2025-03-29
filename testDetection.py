@@ -32,17 +32,22 @@ class Camera:
 
 
 # Start video capture
-src="robogames.avi"
-cam=Camera(src)
+src="video/RobboGmaes_4.avi"
 
+cap=cv2.VideoCapture(src)
+count=0
 while True:
-    frame = cam.get_frame()
-    if frame is None:
+    count+=1
+    ret,frame = cap.read()
+    if not ret:
+        print("exiting")
         break
-
+    if count%10!=0:
+        continue
+    
 
     # Resize frame to match model input size
-
+    print("loop")
     annotated_frame,*_=search_box(frame)
     annotated_frame,*_=find_target(annotated_frame,"Red")
 
@@ -51,5 +56,5 @@ while True:
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
-cam.stop()
+
 cv2.destroyAllWindows()

@@ -61,12 +61,11 @@ def detect_target_color_rgb(box, frame):
 
     # Get the dominant hue value
     dominant_rgb = get_dominent_rgb_colr(rgb_box)
-    cv2.putText(frame, f"Dominant RGB: {dominant_rgb[0]},{dominant_rgb[1]},{dominant_rgb[2]} ", (max_x2, max_y1), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
 
     # Map the dominant hue to a color name
     detected_color = classify_color_rgb(dominant_rgb)
 
-    return detected_color
+    return detected_color,dominant_rgb
 
 # Function to classify color using HSV ranges
 def classify_color_hsv(hsv):
@@ -144,12 +143,11 @@ def detect_target_color_hsv(box, frame):
 
     # Get the dominant hue value
     dominant_hue = get_dominant_color_hsv(hsv_box)
-    cv2.putText(frame, f"Dominant hue: {dominant_hue}", (max_x2, max_y1), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
 
     # Map the dominant hue to a color name
     detected_color = classify_color_hsv([dominant_hue, 255, 255])
 
-    return detected_color
+    return detected_color,dominant_hue
 
 
 # Function to check if the object is in the grab area
@@ -200,14 +198,21 @@ def search_box(frame):
         object_type=int(box.cls[0])
  
         x_center,y_center,w,h = box.xywh[0]
-        detected_color = detect_target_color_hsv(box,frame)
-        detected_color2 = detect_target_color_rgb(box,frame)
+        detected_color,hue = detect_target_color_hsv(box,frame)
+        detected_color2,rgb = detect_target_color_rgb(box,frame)
+
+        print(hue)
+        
+
 
         if object_type==0: 
             print(f"Detected color: {detected_color}") 
-            cv2.putText(annotated_frame, f"Color: {detected_color}", (int(x_center), int(y_center) + 10),
+            cv2.putText(annotated_frame, f"Color: {detected_color}", (int(x_center), int(y_center) -20),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+            corner_x,b,a,corner_y=box.xyxy[0]
+            cv2.putText(annotated_frame, f"HUE: {hue}", (int(corner_x), int(corner_y)-10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
 
+            cv2.putText(annotated_frame, f"RGB: {rgb[0]},{rgb[1]},{rgb[2]} ", (int(corner_x), int(corner_y)+20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
             if detected_color == target_color:
                 target_x_center=x_center
                 target_y_center=y_center
@@ -242,8 +247,6 @@ def search_box(frame):
         cv2.circle(annotated_frame, (int(target_x_center), int(target_y_center)), 5, (0, 255, 0), -1)
         cv2.putText(annotated_frame, f"Dist: {pixel_distance:.2f}px", (int(target_x_center), int(target_y_center) - 10),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
-        cv2.putText(annotated_frame, f"Color: {detected_color}", (int(target_x_center), int(target_y_center) + 30),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 200), 2)
 
     return annotated_frame,objectPresent,isGrabed,pixel_distance
 
@@ -267,12 +270,20 @@ def find_target(frame, detected_color):
             target_x1, target_y1, target_x2, target_y2 = box.xyxy[0]
             target_pix_area = abs((target_y2-target_y1)*(target_x2-target_x1))
             target_center = (target_x1 + target_x2) // 2
-            target_color = detect_target_color_hsv(box, frame)
-            target_color2 = detect_target_color_rgb(box, frame)
+            target_color,hue = detect_target_color_hsv(box, frame)
+            target_color2,rgb = detect_target_color_rgb(box, frame)
 
-            cv2.putText(annotated_frame, f"Color: {detected_color}", (int(target_x2), int(target_y2) + 30),
+            cv2.putText(annotated_frame, f"Color: {detected_color}", (int(target_x2), int(target_y2) -20),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 200), 2)
             print(f"Target color: {target_color}")
+
+            cv2.putText(annotated_frame, f"Hue: {hue}", (int(target_x2),int(target_y1)-10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+
+            cv2.putText(annotated_frame, f"RGB: {rgb[0]},{rgb[1]},{rgb[2]} ", (int(target_x1),int(target_y2)+20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+            
+
+
+
 
             if(target_color == detected_color):
                 print("Target found!")
