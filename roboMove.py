@@ -11,7 +11,6 @@ placedtodirection=False
 latestColor=None
 direction = "init"
 color="unknown"
-colorArray=["Red","Green","Blue","Yellow"]
 turndDirection="init"
 skip_obstacles=True
 
@@ -124,8 +123,6 @@ def gotoPlacemnet(detectedcolor):
         target_found, target_pixel_distance, can_place=getTargetdata(detectedcolor)
 
 
-
-
     return
     
 
@@ -171,18 +168,11 @@ if __name__ == "__main__":
 
     for i in range(4):
         robot.move(-60,-60,0)
-        robo
-    robot.move()
+        robot.play_recharge_sound()
+        time.sleep(0.5)
+    robot.move(0,0,0)
 
         
 
 camera.stop()
 cv2.destroyAllWindows()
-        
-
-
-
-
-
-
-    
