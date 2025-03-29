@@ -10,13 +10,20 @@ grab_area = [200,370,440,480] # x1, y1, x2, y2
 pixel_distance = 0
 objectPresent = False
 color = "Unknown"
-colorArray = ["Yellow", "Green", "Red", "Blue"]
+colorArray = ["Yellow", "Green", "Red", "Red"]
 
 
 #found target variables
 target_found = False
 target_pixel_distance = 0
 can_place = False
+
+COLOR_RANGES_RGB ={
+    "Red": [(150, 90, 100), (255, 130, 255)],
+    "Green": [(60, 100, 0), (90, 255, 100)],
+    "Blue": [(50, 120, 150), (120, 200, 255)],
+    "Yellow": [(150, 150, 80), (255, 255, 110)]
+}
 
 
 COLOR_RANGES_HSV = {
@@ -27,7 +34,38 @@ COLOR_RANGES_HSV = {
     "White" : [(0, 0, 200), (180, 30, 255)]
 }
 
+def classify_color_rgb(rgb):
+    R, G, B = rgb
+    print(f"R : {R},  G : {G} ,  B:{B}")
+    for color, (lower, upper) in COLOR_RANGES_RGB.items():
+        if lower[0] <= R <= upper[0] and lower[1] <= G <= upper[1] and lower[2] <= B <= upper[2]:
+            return color
+    return "Unknown"
 
+def get_dominent_rgb_colr(rgb_box):
+
+    pixels = rgb_box.reshape(-1, 3)
+    
+    # Count unique RGB values
+    unique_colors, counts = np.unique(pixels, axis=0, return_counts=True)
+    
+    # Find the most frequent RGB color
+    dominant_rgb = unique_colors[np.argmax(counts)]
+    
+    return tuple(dominant_rgb)  
+
+def detect_target_color_rgb(box, frame):
+    rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    max_x1, max_y1, max_x2, max_y2 = map(int, box.xyxy[0])
+    rgb_box = rgb_frame[max_y1:max_y2, max_x1:max_x2]
+
+    # Get the dominant hue value
+    dominant_hue = get_dominent_rgb_colr(rgb_box)
+
+    # Map the dominant hue to a color name
+    detected_color = classify_color_rgb(dominant_hue)
+
+    return detected_color
 
 # Function to classify color using HSV ranges
 def classify_color_hsv(hsv):
@@ -205,7 +243,7 @@ def search_box(frame):
         cv2.putText(annotated_frame, f"Color: {detected_color}", (int(target_x_center), int(target_y_center) + 30),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 200), 2)
 
-    return annotated_frame,objectPresent,isGrabed,pixel_distance,obstacle_dist 
+    return annotated_frame,objectPresent,isGrabed,pixel_distance
 
 # Find a matching target for grabbed box
 def find_target(frame, detected_color):
