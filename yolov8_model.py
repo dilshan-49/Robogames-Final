@@ -11,7 +11,7 @@ pixel_distance = 0
 objectPresent = False
 color = "Unknown"
 colorArray = ["Yellow", "Green", "Red", "Red"]
-
+prev_color="unknown"
 
 #found target variables
 target_found = False
@@ -71,7 +71,7 @@ def detect_target_color_rgb(box, frame):
 def classify_color_hsv(hsv):
     H, S, V = hsv
     for color, (lower, upper) in COLOR_RANGES_HSV.items():
-        if (lower[0] <= H <= upper[0]):
+        if (lower[0] <= H <= upper[0] and lower[1] <= S <= upper[1] and lower[2] <= V <= upper[2]) :
             return color
     return "Unknown"
 
@@ -212,7 +212,7 @@ def search_box(frame):
             corner_x,b,a,corner_y=box.xyxy[0]
             cv2.putText(annotated_frame, f"HUE: {hue}", (int(corner_x), int(corner_y)-10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
 
-            cv2.putText(annotated_frame, f"RGB: {rgb[0]},{rgb[1]},{rgb[2]} ", (int(corner_x), int(corner_y)+20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+         #   cv2.putText(annotated_frame, f"RGB: {rgb[0]},{rgb[1]},{rgb[2]} ", (int(corner_x), int(corner_y)+20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
             if detected_color == target_color:
                 target_x_center=x_center
                 target_y_center=y_center
@@ -279,7 +279,7 @@ def find_target(frame, detected_color):
 
             cv2.putText(annotated_frame, f"Hue: {hue}", (int(target_x2),int(target_y1)-10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
 
-            cv2.putText(annotated_frame, f"RGB: {rgb[0]},{rgb[1]},{rgb[2]} ", (int(target_x1),int(target_y2)+20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+         #   cv2.putText(annotated_frame, f"RGB: {rgb[0]},{rgb[1]},{rgb[2]} ", (int(target_x1),int(target_y2)+20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
             
 
 

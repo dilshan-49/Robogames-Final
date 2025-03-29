@@ -160,7 +160,7 @@ if __name__ == "__main__":
         gotoPlacemnet(color)
         print("went to target")
         place_Box()
-        colorArray.pop()
+        prev_color=colorArray.pop()
         robot.play_clean_start_sound()
         robot.play_clean_stop_sound()
         print("done")

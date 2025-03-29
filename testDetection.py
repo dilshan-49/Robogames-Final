@@ -3,7 +3,7 @@ import numpy as np
 from ultralytics import YOLO
 from yolov8_model import *
 from threading import Thread
-
+import time
 
 class Camera:
     def __init__(self,source=0):
@@ -32,7 +32,7 @@ class Camera:
 
 
 # Start video capture
-src="video/RobboGmaes_4.avi"
+src="video/output.avi"
 
 cap=cv2.VideoCapture(src)
 count=0
@@ -42,8 +42,7 @@ while True:
     if not ret:
         print("exiting")
         break
-    if count%10!=0:
-        continue
+
     
 
     # Resize frame to match model input size
