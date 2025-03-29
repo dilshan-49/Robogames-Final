@@ -10,7 +10,7 @@ grab_area = [200,370,440,480] # x1, y1, x2, y2
 pixel_distance = 0
 objectPresent = False
 color = "Unknown"
-colorArray = ["Yellow", "Green", "Red", "Red"]
+colorArray = ["Yellow", "Green", "Red", "Blue"]
 prev_color="unknown"
 
 #found target variables
