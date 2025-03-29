@@ -21,7 +21,8 @@ COLOR_RANGES_HSV = {
     "Red": [(0,40,80), (10, 255, 255)],   # Red can also be (170,255,255) in OpenCV
     "Green": [(35, 40, 80), (80, 255, 255)],
     "Blue": [(80, 40, 80), (130, 255, 255)],  #Should change to light blue
-    "Yellow": [(20, 40, 80), (35, 255, 255)]
+    "Yellow": [(20, 40, 80), (35, 255, 255)],
+    "White" : [(0, 0, 200), (180, 30, 255)]
 }
 
 
@@ -48,6 +49,80 @@ def detect_color_hsv(box, frame):
     detected_color = classify_color_hsv(avg_color)
     
     return avg_color, detected_color  # Return both HSV color and detected color
+
+
+def get_dominant_color_hsv(hsv_box):
+    """
+    Get the most available (dominant) color in an HSV NumPy array.
+
+    Args:
+        hsv_box (numpy.ndarray): The HSV region of interest (ROI).
+
+    Returns:
+        int: The dominant hue value (0-179).
+    """
+    # Flatten the hue channel
+    hue_values = hsv_box[:, :, 0].flatten()
+
+    # Calculate the histogram of hue values (0-179 for HSV)
+    hist = np.bincount(hue_values, minlength=180)
+
+    # Find the hue with the maximum count
+    dominant_hue = np.argmax(hist)
+
+    return dominant_hue
+
+def detect_dominant_color_hsv(box, frame):
+    """
+    Detect the dominant color in a bounding box using HSV.
+
+    Args:
+        box: The bounding box object from YOLO.
+        frame: The current frame in BGR format.
+
+    Returns:
+        int: The dominant hue value (0-179).
+        str: The detected color name.
+    """
+    # Convert the frame to HSV
+    hsv_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+
+    # Extract the bounding box coordinates
+    max_x1, max_y1, max_x2, max_y2 = map(int, box.xyxy[0])
+
+    # Get the HSV region of interest (ROI)
+    hsv_box = hsv_frame[max_y1:max_y2, max_x1:max_x2]
+
+    # Get the dominant hue value
+    dominant_hue = get_dominant_color_hsv(hsv_box)
+
+    # Map the dominant hue to a color name
+    detected_color = classify_color_hsv([dominant_hue, 255, 255])  # Use max S and V for classification
+
+    return dominant_hue, detected_color
+
+def detect_target_color_hsv(box, frame):
+    """
+    Detect the dominant color in a bounding box using HSV.
+
+    Args:
+        box: The bounding box object from YOLO.
+        frame: The current frame in BGR format.
+
+    Returns:
+        str: The detected color name.
+    """
+    hsv_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+    max_x1, max_y1, max_x2, max_y2 = map(int, box.xyxy[0])
+    hsv_box = hsv_frame[max_y1:max_y2, max_x1:max_x2]
+
+    # Get the dominant hue value
+    dominant_hue = get_dominant_color_hsv(hsv_box)
+
+    # Map the dominant hue to a color name
+    detected_color = classify_color_hsv([dominant_hue, 255, 255])
+
+    return detected_color
 
 
 # Function to check if the object is in the grab area
@@ -83,8 +158,8 @@ def search_box(frame):
 
             x_center,y_center,w,h = box.xywh[0]
             pixel_area=w*h
-            avg_color,detected_color = detect_color_hsv(box,frame)
-            print(f"Detected color: {avg_color}")
+            detected_color = detect_target_color_hsv(box,frame)
+            #print(f"Detected color: {avg_color}")
             print(f"Detected color: {detected_color}") 
 
             if pixel_area > max_area and detected_color != "Unknown":
@@ -148,7 +223,10 @@ def find_target(frame, detected_color):
             target_x1, target_y1, target_x2, target_y2 = box.xyxy[0]
             target_pix_area = abs((target_y2-target_y1)*(target_x2-target_x1))
             target_center = (target_x1 + target_x2) // 2
-            target_color = detect_color_hsv(box, frame)
+            target_color = detect_target_color_hsv(box, frame)
+
+            cv2.putText(annotated_frame, f"Color: {detected_color}", (int(target_x2), int(target_y2) + 30),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 200), 2)
             print(f"Target color: {target_color}")
             if(target_color == detected_color):
                 print("Target found!")
