@@ -122,7 +122,9 @@ def gotoPlacemnet(detectedcolor):
     while(not can_place):
         #need to get the placment position data,color,are of the placment positionand so on using the model
         print(f"going for target {detectedcolor}")
-        if(target_pixel_distance>30):
+        if(not target_found):
+            turnLeft()
+        elif (target_pixel_distance>30):
             robot.move(50,0,0)
   
         elif (target_pixel_distance<-30):
@@ -130,10 +132,13 @@ def gotoPlacemnet(detectedcolor):
  
         else:
             robot.move(80,80,0)
+
         target_found, target_pixel_distance, can_place=getTargetdata(detectedcolor)
         if (not target_found):
-            max_without_color
-            return
+            target_found, target_pixel_distance, can_place=getMaxData(2)
+
+
+
 
 
     return
@@ -166,11 +171,11 @@ def getMaxData(cls):
             return
         return isGrabed, max_box, max_box_dist
     else:
-        annotated_frame,isGrabed, max_box, max_box_dist=target_without_color(frame,cls)
+        annotated_frame,target_found, target_pixel_distance, can_place=target_without_color(frame)
         cv2.imshow("a",annotated_frame)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             return
-        return isGrabed, max_box, max_box_dist
+        return target_found,target_pixel_distance,can_place
 
     
 
