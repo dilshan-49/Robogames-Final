@@ -60,10 +60,11 @@ def detect_target_color_rgb(box, frame):
     rgb_box = rgb_frame[max_y1:max_y2, max_x1:max_x2]
 
     # Get the dominant hue value
-    dominant_hue = get_dominent_rgb_colr(rgb_box)
+    dominant_rgb = get_dominent_rgb_colr(rgb_box)
+    cv2.putText(frame, f"Dominant RGB: {dominant_rgb[0]},{dominant_rgb[1]},{dominant_rgb[2]} ", (max_x2, max_y1), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
 
     # Map the dominant hue to a color name
-    detected_color = classify_color_rgb(dominant_hue)
+    detected_color = classify_color_rgb(dominant_rgb)
 
     return detected_color
 
@@ -71,7 +72,7 @@ def detect_target_color_rgb(box, frame):
 def classify_color_hsv(hsv):
     H, S, V = hsv
     for color, (lower, upper) in COLOR_RANGES_HSV.items():
-        if lower[0] <= H <= upper[0] and lower[1] <= S <= upper[1] and lower[2] <= V <= upper[2]:
+        if (lower[0] <= H <= upper[0]):
             return color
     return "Unknown"
 
@@ -143,6 +144,7 @@ def detect_target_color_hsv(box, frame):
 
     # Get the dominant hue value
     dominant_hue = get_dominant_color_hsv(hsv_box)
+    cv2.putText(frame, f"Dominant hue: {dominant_hue}", (max_x2, max_y1), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
 
     # Map the dominant hue to a color name
     detected_color = classify_color_hsv([dominant_hue, 255, 255])
@@ -199,6 +201,7 @@ def search_box(frame):
  
         x_center,y_center,w,h = box.xywh[0]
         detected_color = detect_target_color_hsv(box,frame)
+        detected_color2 = detect_target_color_rgb(box,frame)
 
         if object_type==0: 
             print(f"Detected color: {detected_color}") 
@@ -210,7 +213,6 @@ def search_box(frame):
                 target_y_center=y_center
                 target_box = box   
             
-                
 
         elif (object_type==1 and detected_color=="White") :  ## obstacle detected
     
@@ -266,6 +268,7 @@ def find_target(frame, detected_color):
             target_pix_area = abs((target_y2-target_y1)*(target_x2-target_x1))
             target_center = (target_x1 + target_x2) // 2
             target_color = detect_target_color_hsv(box, frame)
+            target_color2 = detect_target_color_rgb(box, frame)
 
             cv2.putText(annotated_frame, f"Color: {detected_color}", (int(target_x2), int(target_y2) + 30),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 200), 2)
