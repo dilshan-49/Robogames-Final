@@ -88,14 +88,22 @@ def get_dominant_color_hsv(hsv_box):
     """
     # Flatten the hue channel
     hue_values = hsv_box[:, :, 0].flatten()
+    saturation_values = hsv_box[:, :, 1].flatten()
+    value_values = hsv_box[:, :, 2].flatten()
 
     # Calculate the histogram of hue values (0-179 for HSV)
-    hist = np.bincount(hue_values, minlength=180)
+    hue_hist = np.bincount(hue_values, minlength=180)
+    saturation_hist = np.bincount(saturation_values, minlength=256)
+    value_hist = np.bincount(value_values, minlength=256)
 
-    # Find the hue with the maximum count
-    dominant_hue = np.argmax(hist)
+    # Find the dominant H, S, and V values
+    dominant_hue = np.argmax(hue_hist)
+    dominant_saturation = np.argmax(saturation_hist)
+    dominant_value = np.argmax(value_hist)
 
-    return dominant_hue
+    # Calculate the histogram of hue values (0-179 for HSV)
+
+    return dominant_hue,dominant_saturation,dominant_value
 
 def detect_dominant_color_hsv(box, frame):
     """
@@ -119,12 +127,12 @@ def detect_dominant_color_hsv(box, frame):
     hsv_box = hsv_frame[max_y1:max_y2, max_x1:max_x2]
 
     # Get the dominant hue value
-    dominant_hue = get_dominant_color_hsv(hsv_box)
+    dominant_hue,dominant_S,dominant_V = get_dominant_color_hsv(hsv_box)
 
     # Map the dominant hue to a color name
     detected_color = classify_color_hsv([dominant_hue, 255, 255])  # Use max S and V for classification
 
-    return dominant_hue, detected_color
+    return dominant_hue,dominant_S,dominant_V, detected_color
 
 def detect_target_color_hsv(box, frame):
     """
@@ -142,12 +150,12 @@ def detect_target_color_hsv(box, frame):
     hsv_box = hsv_frame[max_y1:max_y2, max_x1:max_x2]
 
     # Get the dominant hue value
-    dominant_hue = get_dominant_color_hsv(hsv_box)
+    dominant_hue,dominant_S,dominant_V = get_dominant_color_hsv(hsv_box)
 
     # Map the dominant hue to a color name
     detected_color = classify_color_hsv([dominant_hue, 255, 255])
 
-    return detected_color,dominant_hue
+    return detected_color,dominant_hue,dominant_S,dominant_V
 
 
 # Function to check if the object is in the grab area
@@ -197,8 +205,7 @@ def search_box(frame):
     for box in result.boxes:
         object_type=int(box.cls[0])
         x_center,y_center,w,h = box.xywh[0]
-        detected_color,hue = detect_target_color_hsv(box,frame)
-        detected_color2,rgb = detect_target_color_rgb(box,frame)
+        detected_color,hue,S,V = detect_target_color_hsv(box,frame)
 
         print(hue)
         
@@ -209,7 +216,7 @@ def search_box(frame):
             cv2.putText(annotated_frame, f"Color: {detected_color}", (int(x_center), int(y_center) -20),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
             corner_x,b,a,corner_y=box.xyxy[0]
-            cv2.putText(annotated_frame, f"HUE: {hue}", (int(corner_x), int(corner_y)-10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+            cv2.putText(annotated_frame, f"HSV: {hue}, {S}, {V} ", (int(corner_x), int(corner_y)-10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 255), 1)
 
          #   cv2.putText(annotated_frame, f"RGB: {rgb[0]},{rgb[1]},{rgb[2]} ", (int(corner_x), int(corner_y)+20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
             if detected_color == target_color:
@@ -269,14 +276,13 @@ def find_target(frame, detected_color):
             target_x1, target_y1, target_x2, target_y2 = box.xyxy[0]
             target_pix_area = abs((target_y2-target_y1)*(target_x2-target_x1))
             target_center = (target_x1 + target_x2) // 2
-            target_color,hue = detect_target_color_hsv(box, frame)
-            target_color2,rgb = detect_target_color_rgb(box, frame)
+            target_color,hue,S,V = detect_target_color_hsv(box, frame)
 
             cv2.putText(annotated_frame, f"Color: {detected_color}", (int(target_x2), int(target_y2) -20),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 200), 2)
             print(f"Target color: {target_color}")
 
-            cv2.putText(annotated_frame, f"Hue: {hue}", (int(target_x2),int(target_y1)-10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+            cv2.putText(annotated_frame, f"HSV: {hue}, {S}, {V}", (int(target_x2),int(target_y1)-10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 255), 1)
             cv2.putText(annotated_frame,f"Area : {target_pix_area}", (int(target_x2),int(target_y1)+10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
 
          #   cv2.putText(annotated_frame, f"RGB: {rgb[0]},{rgb[1]},{rgb[2]} ", (int(target_x1),int(target_y2)+20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
