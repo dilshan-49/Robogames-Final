@@ -6,7 +6,7 @@ model = YOLO("model/robogames_v2.pt")
 
 
 isGrabed = False
-grab_area = [200,370,440,480] # x1, y1, x2, y2
+grab_area = [200,400,440,480] # x1, y1, x2, y2
 pixel_distance = 0
 objectPresent = False
 color = "Unknown"
@@ -27,10 +27,10 @@ COLOR_RANGES_RGB ={
 
 
 COLOR_RANGES_HSV = {
-    "Red": [(0,40,80), (10, 255, 255)],   # Red can also be (170,255,255) in OpenCV
-    "Green": [(35, 40, 80), (80, 255, 255)],
-    "Blue": [(80, 40, 80), (130, 255, 255)],  #Should change to light blue
-    "Yellow": [(20, 40, 80), (35, 255, 255)],
+    "Red": [(0,40,80), (18, 255, 255)],   # Red can also be (170,255,255) in OpenCV
+    "Green": [(60, 40, 80), (85, 255, 255)],
+    "Blue": [(95, 40, 80), (130, 255, 255)],  #Should change to light blue
+    "Yellow": [(20, 40, 80), (55, 255, 255)],
     "White" : [(0, 0, 200), (180, 30, 255)]
 }
 
@@ -181,7 +181,7 @@ def search_box(frame):
     obstacle_dist = 1000
     target_box = None
     # Run inference
-    results = model(frame,conf = 0.7)
+    results = model(frame,conf = 0.75)
     result=results[0].cpu().numpy()
   
     annotated_frame = results[0].plot()
@@ -259,7 +259,7 @@ def find_target(frame, detected_color):
     tframe_width = frame.shape[1]
     mid_line = tframe_width//2
 
-    results = model(frame,conf= 0.7)
+    results = model(frame,conf= 0.75)
     result=results[0].cpu().numpy()
     annotated_frame = results[0].plot()
 
