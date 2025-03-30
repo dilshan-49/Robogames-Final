@@ -78,15 +78,16 @@ def moveToBox():
 def place_Box():
     global isGrabed
     print("Placing box")
-    for i in range(10):
-        robot.move(80,80,0)
+    for i in range(15):
+        robot.move(30,30,0)
         time.sleep(0.3)
     robot.move(0,0,0)
     robot.play_on_sound()
     for i in range(20):
-        robot.move(-60,-60,0)
+        robot.move(-50,-50,0)
         time.sleep(0.3)
         robot.play_recharge_sound()
+    robot.move(0,0,0)
 
     isGrabed=False
 
@@ -159,16 +160,21 @@ if __name__ == "__main__":
         initializedetectingObject()#initially check whther a box is detecte 
         print(f"Detected : {color}")
         moveToBox()
+        robot.move(0,0,0)
+        for i in range(5):
+            robot.move(30,30,0)
         print(f"Moved to : {color}")
         gotoPlacemnet(color)
+        robot.move(0,0,0)
         print("went to target")
         place_Box()
+        
         prev_color=colorArray.pop()
         robot.play_clean_start_sound()
         robot.play_clean_stop_sound()
         print("done")
 
-    for i in range(4):
+    for i in range(25):
         robot.move(-60,-60,0)
         robot.play_recharge_sound()
         time.sleep(0.5)
