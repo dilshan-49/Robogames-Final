@@ -8,7 +8,10 @@ cam=Camera()
 
 # Start video capture
 
-
+cap=cv2.VideoCapture(0)
+if not cap.isOpened():
+    print("Error: Unable to access the camera.")
+    exit()
 
 
 while True:
@@ -18,7 +21,10 @@ while True:
         print("exiting")
         break
 
-    
+    # ret,frame = cap.read()
+    # if not ret:
+    #     print("Error: Unable to read from the camera.")
+    #     break
 
     # Resize frame to match model input size
     print("loop")
