@@ -70,6 +70,9 @@ def moveToBox():
                 else:
                     robot.move(80,80,0)
 
+            else:
+                robot.move(30,30,0)
+
             
            
 def place_Box():

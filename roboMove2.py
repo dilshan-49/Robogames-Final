@@ -139,8 +139,6 @@ def gotoPlacemnet(detectedcolor):
 
 
 
-
-
     return
     
 

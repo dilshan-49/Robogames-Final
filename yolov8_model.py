@@ -196,7 +196,6 @@ def search_box(frame):
     
     for box in result.boxes:
         object_type=int(box.cls[0])
- 
         x_center,y_center,w,h = box.xywh[0]
         detected_color,hue = detect_target_color_hsv(box,frame)
         detected_color2,rgb = detect_target_color_rgb(box,frame)
