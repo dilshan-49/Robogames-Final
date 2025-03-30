@@ -195,7 +195,7 @@ if __name__ == "__main__":
         print(f"Detected : {color}")
         moveToBox()
         print(f"Moved to : {color}")
-        gotoPlacemnet(color)
+        gotoPlacemnet(color)                #need to adjust the tim
         print("went to target")
         place_Box()
         prev_color=colorArray.pop()
