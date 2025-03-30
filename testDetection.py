@@ -7,7 +7,7 @@ from cam_feed import Camera
 cam=Camera()
 
 # Start video capture
-
+count=0
 cap=cv2.VideoCapture(0)
 if not cap.isOpened():
     print("Error: Unable to access the camera.")
