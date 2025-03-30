@@ -277,6 +277,7 @@ def find_target(frame, detected_color):
             print(f"Target color: {target_color}")
 
             cv2.putText(annotated_frame, f"Hue: {hue}", (int(target_x2),int(target_y1)-10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+            cv2.putText(annotated_frame,f"Area : {target_pix_area}", (int(target_x2),int(target_y1)+10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
 
          #   cv2.putText(annotated_frame, f"RGB: {rgb[0]},{rgb[1]},{rgb[2]} ", (int(target_x1),int(target_y2)+20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
             
