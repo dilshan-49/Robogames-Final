@@ -2,19 +2,19 @@ import cv2
 import numpy as np
 from ultralytics import YOLO
 from yolov8_model import *
+from cam_feed import Camera
 
-
-
+cam=Camera()
 
 # Start video capture
 
 
-cap=cv2.VideoCapture(0)
-count=0
+
+
 while True:
     count+=1
-    ret,frame = cap.read()
-    if not ret:
+    frame = cam.get_frame()
+    if frame is None:
         print("exiting")
         break
 
