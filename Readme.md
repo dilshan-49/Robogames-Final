@@ -81,7 +81,7 @@ The arena consists of:
 - Colored boxes (Red, Green, Blue, Yellow) scattered in random positions.
 - Target areas for each color, marked with the same color.
 
-![Arena Layout](path/to/arena-image.png)
+![Arena Layout](arena.jpg)
 
 ## Notes
 
