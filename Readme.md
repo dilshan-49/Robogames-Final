@@ -1,4 +1,4 @@
-# RoboGames Final Project
+# IESL RoboGames Final
 
 This project involves controlling a Kobuki robot to autonomously pick up colored boxes and place them in their designated target locations within an arena. The robot uses computer vision to detect boxes and targets, and it follows a predefined sequence of colors to complete the task.
 
