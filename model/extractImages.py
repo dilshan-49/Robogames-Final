@@ -6,12 +6,12 @@ import glob
 
 
 # Directory to save the extracted images
-output_dir = "E:\\RoboGames\\train_images"
+output_dir = "Path\\to\\save\\train_images"
 os.makedirs(output_dir, exist_ok=True)
 
 frame_count = 67
 
-video_path="E:\\output.avi"
+video_path="Path\\to\\source.avi"
     # Open the video file
 cap = cv2.VideoCapture(video_path)
 if not cap.isOpened():

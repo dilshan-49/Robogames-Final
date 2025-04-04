@@ -4,7 +4,7 @@ This project involves controlling a Kobuki robot to autonomously pick up colored
 
 ## Features
 
-- **Color Detection**: The robot identifies boxes and targets based on their colors using YOLOv8 and HSV/RGB color classification.
+- **Color Detection**: The robot identifies boxes and targets based on their colors using YOLOv8 and HSV color classification.
 - **Autonomous Navigation**: The robot moves towards the detected boxes and targets, adjusting its position based on pixel distance.
 - **Box Placement**: The robot places the boxes in their respective target locations.
 - **Sequence Handling**: The robot processes boxes in a predefined sequence of colors.
@@ -16,13 +16,8 @@ This project involves controlling a Kobuki robot to autonomously pick up colored
 ├── cam_feed.py          # Handles camera input and frame updates
 ├── yolov8_model.py      # YOLOv8 model and color detection logic
 ├── roboMove.py          # Main script for running the Kobuki robot
-├── datasets/            # Contains training datasets for YOLOv8
-├── model/               # Pre-trained YOLOv8 models
-├── output/              # Output directory for results
-├── runs/                # YOLOv8 run logs
-├── saimages/            # Sample images for testing
+├── model/               # custom trained YOLOv8 models and notebooks to train the model
 ├── testingCodes/        # Contains test scripts for robot movements
-├── video/               # Video recordings of robot runs
 └── requirements.txt     # Python dependencies
 ```
 
@@ -60,7 +55,7 @@ This project involves controlling a Kobuki robot to autonomously pick up colored
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/your-repo/robogames-final.git
+   git clone https://github.com/dilshan-49/Robogames-Final.git
    cd robogames-final
    ```
 
@@ -69,7 +64,7 @@ This project involves controlling a Kobuki robot to autonomously pick up colored
    pip install -r requirements.txt
    ```
 
-3. Place the pre-trained YOLOv8 model in the `model/` directory.
+3. Place the trained YOLOv8 model in the `model/` directory.
 
 ## Usage
 
@@ -94,8 +89,8 @@ The arena consists of:
 - The robot's camera should be calibrated for the specific environment.
 
 ## Contributers
- - Shehan Perera - [Github]()
- - Dhawala Rajakaruna - [Github]()
+ - Shehan Perera - [Github](https://github.com/ShehanPer)
+ - Dhawala Rajakaruna - [Github](https://github.com/DhawalaRajakaruna)
 
 ## Acknowledgments
 
