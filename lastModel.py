@@ -225,14 +225,9 @@ def search_box(frame):
                 target_box = box   
             
 
-        elif (object_type==1 and detected_color=="White") :  ## obstacle detected
-    
-            if (w*h>10000 and 220<x_center<420):
-                obstacle_dist=x_center-mid_vertical_line
-            pass
-
     if target_box is None:
         objectPresent = False
+        pixel_distance = 0
 
         
     else:
@@ -309,4 +304,121 @@ def find_target(frame, detected_color):
                 can_place = False
 
     return annotated_frame,target_found, target_pixel_distance, can_place
+
+def search_box_any(frame):  
+    global isGrabed
+    global pixel_distance
+    global objectPresent
+    detected_color="unknown"
+    obstacle_dist = 1000
+    target_box = None
+    # Run inference
+    results = model(frame,conf = 0.75)
+    result=results[0].cpu().numpy()
+  
+    annotated_frame = results[0].plot()
+
+
+    frame_width = frame.shape[1]
+    mid_vertical_line = frame_width//2
+
+    target_color=colorArray[-1]
+    cv2.putText(annotated_frame, f"Target color : {target_color}", (200, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+    cv2.rectangle(annotated_frame, (int(grab_area[0]), int(grab_area[1])), (int(grab_area[2]), int(grab_area[3])), (255, 255, 255), 1)
+    
+    max_area=0
+    for box in result.boxes:
+        object_type=int(box.cls[0])
+        x_center,y_center,w,h = box.xywh[0]
+        detected_color,hue,S,V = detect_target_color_hsv(box,frame)
+        area=w*h
+
+        if (object_type==0 or object_type==1): 
+            print(f"Detected color: {detected_color}") 
+            cv2.putText(annotated_frame, f"Color: {detected_color}", (int(x_center), int(y_center) -20),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+            corner_x,b,a,corner_y=box.xyxy[0]
+            cv2.putText(annotated_frame, f"HSV: {hue}, {S}, {V} ", (int(corner_x), int(corner_y)-10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 255), 1)
+
+         #   cv2.putText(annotated_frame, f"RGB: {rgb[0]},{rgb[1]},{rgb[2]} ", (int(corner_x), int(corner_y)+20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+            if area>max_area:
+                target_box=box
+                max_area=area
+                target_x_center=x_center
+                target_y_center=y_center
+            
+
+    if target_box is None:
+        objectPresent = False
+
+        
+    else:
+        objectPresent = True
+        pixel_distance =  target_x_center - mid_vertical_line
+
+
+        if is_grab(target_x_center, target_y_center,color):
+            isGrabed = True
+            cv2.putText(annotated_frame, "Object in grab area!", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+            cv2.putText(annotated_frame, f"Color: {detected_color}", (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)  
+        else:
+            isGrabed = False
+            cv2.putText(annotated_frame, "Object not in grab area!", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+            cv2.putText(annotated_frame, f"Color: {detected_color}", (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+
+
+        cv2.circle(annotated_frame, (int(target_x_center), int(target_y_center)), 5, (0, 255, 0), -1)
+        cv2.putText(annotated_frame, f"Dist: {pixel_distance:.2f}px", (int(target_x_center), int(target_y_center) - 10),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+
+    return annotated_frame,objectPresent,isGrabed,pixel_distance
+
+
+def find_target_any(frame):
+    global target_found
+    global target_pixel_distance
+    global can_place 
+    global isGrabed
+    print("Searching for target...")
+    tframe_width = frame.shape[1]
+    mid_line = tframe_width//2
+    target_found=False
+    results = model(frame,conf= 0.75)
+    result=results[0].cpu().numpy()
+    annotated_frame = results[0].plot()
+
+    for box in result.boxes:
+        if(int(box.cls[0])==2):
+            
+            target_x1, target_y1, target_x2, target_y2 = box.xyxy[0]
+            target_pix_area = abs((target_y2-target_y1)*(target_x2-target_x1))
+            target_center = (target_x1 + target_x2) // 2
+            target_color,hue,S,V = detect_target_color_hsv(box, frame)
+
+           
+            print(f"Target color: {target_color}")
+
+            cv2.putText(annotated_frame, f"HSV: {hue}, {S}, {V}", (int(target_x2),int(target_y1)-10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 255), 1)
+            cv2.putText(annotated_frame,f"Area : {target_pix_area}", (int(target_x2),int(target_y1)+10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+
+         #   cv2.putText(annotated_frame, f"RGB: {rgb[0]},{rgb[1]},{rgb[2]} ", (int(target_x1),int(target_y2)+20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+
+            print("Target found!")
+            cv2.rectangle(annotated_frame, (int(target_x1), int(target_y1)), (int(target_x2), int(target_y2)), (0, 255, 0), 2)
+            cv2.putText(annotated_frame, "Target found!", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+            target_found = True
+            target_pixel_distance = target_center - mid_line
+            if(target_pix_area>100000 and has_intersection(grab_area, box.xyxy[0])):
+                print(" Place the shit")
+                can_place = True
+                isGrabed = False
+            else:
+                can_place = False
+    else:
+        target_found = False
+        target_pixel_distance = 0
+        can_place = False
+
+    return annotated_frame,target_found, target_pixel_distance, can_place
+
 
